@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="docsearch-title docsearch-desc" font-family="'JetBrains Mono','Noto Sans TC',monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="docsearch-title docsearch-desc" font-family="'JetBrains Mono',monospace">
   <title id="docsearch-title">DocSearch system overview</title>
   <desc id="docsearch-desc">A browser SPA calls an API server and query service; the query service reads PostgreSQL and a vector DB and calls an LLM API, while an offline ingest pipeline fills object storage and the vector index.</desc>
   <defs>
@@ -60,32 +60,27 @@
   <g class="zone" id="zone-frontend" fill="none" stroke="#1a1a1a">
     <rect x="60" y="120" width="720" height="152" rx="16" stroke-width="1.2" stroke-dasharray="5 5"/>
     <text x="84" y="148" font-size="16" letter-spacing="3" fill="#1a1a1a" stroke="none">FRONTEND</text>
-    <text x="84" y="166" font-size="12" fill="#1a1a1a" stroke="none">前端</text>
-    <line x1="84" y1="172" x2="132" y2="172" stroke-width="1"/>
+    <line x1="84" y1="156" x2="132" y2="156" stroke-width="1"/>
   </g>
   <g class="zone" id="zone-backend" fill="none" stroke="#1a1a1a">
     <rect x="60" y="312" width="720" height="152" rx="16" stroke-width="1.2" stroke-dasharray="5 5"/>
     <text x="84" y="340" font-size="16" letter-spacing="3" fill="#1a1a1a" stroke="none">BACKEND</text>
-    <text x="84" y="358" font-size="12" fill="#1a1a1a" stroke="none">後端</text>
-    <line x1="84" y1="364" x2="132" y2="364" stroke-width="1"/>
+    <line x1="84" y1="348" x2="132" y2="348" stroke-width="1"/>
   </g>
   <g class="zone" id="zone-data" fill="none" stroke="#1a1a1a">
     <rect x="60" y="504" width="720" height="152" rx="16" stroke-width="1.2" stroke-dasharray="5 5"/>
     <text x="84" y="532" font-size="16" letter-spacing="3" fill="#1a1a1a" stroke="none">DATA</text>
-    <text x="84" y="550" font-size="12" fill="#1a1a1a" stroke="none">資料層</text>
-    <line x1="84" y1="556" x2="132" y2="556" stroke-width="1"/>
+    <line x1="84" y1="540" x2="132" y2="540" stroke-width="1"/>
   </g>
   <g class="zone" id="zone-external" fill="none" stroke="#1a1a1a">
     <rect x="820" y="120" width="320" height="240" rx="16" stroke-width="1.2" stroke-dasharray="5 5"/>
     <text x="844" y="148" font-size="16" letter-spacing="3" fill="#1a1a1a" stroke="none">EXTERNAL</text>
-    <text x="844" y="166" font-size="12" fill="#1a1a1a" stroke="none">雲端外部服務</text>
-    <line x1="844" y1="172" x2="892" y2="172" stroke-width="1"/>
+    <line x1="844" y1="156" x2="892" y2="156" stroke-width="1"/>
   </g>
   <g class="zone" id="zone-offline" fill="none" stroke="#1a1a1a">
     <rect x="820" y="400" width="320" height="256" rx="16" stroke-width="1.2" stroke-dasharray="5 5"/>
     <text x="844" y="428" font-size="16" letter-spacing="3" fill="#1a1a1a" stroke="none">OFFLINE PIPELINE</text>
-    <text x="844" y="446" font-size="12" fill="#1a1a1a" stroke="none">離線批次流程</text>
-    <line x1="844" y1="452" x2="892" y2="452" stroke-width="1"/>
+    <line x1="844" y1="436" x2="892" y2="436" stroke-width="1"/>
   </g>
 
   <!-- 連線（先畫線、後畫節點） -->
@@ -107,60 +102,78 @@
     <rect x="324" y="184" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-browser" x="340" y="204" width="24" height="24"/>
     <text x="380" y="212" font-size="14" font-weight="600" fill="#1a1a1a">Browser SPA</text>
-    <text x="380" y="230" font-size="11" fill="#1a1a1a" fill-opacity="0.65">搜尋與閱讀介面</text>
+    <text x="380" y="230" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Search + reading UI</text>
   </g>
   <g class="node" id="n-api">
     <rect x="324" y="376" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-server" x="340" y="396" width="24" height="24"/>
     <text x="380" y="404" font-size="14" font-weight="600" fill="#1a1a1a">API Server</text>
-    <text x="380" y="422" font-size="11" fill="#1a1a1a" fill-opacity="0.65">REST 入口與權限檢查</text>
+    <text x="380" y="422" font-size="11" fill="#1a1a1a" fill-opacity="0.65">REST entry + authz</text>
   </g>
   <g class="node" id="n-query">
     <rect x="564" y="376" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-search" x="580" y="396" width="24" height="24"/>
     <text x="620" y="404" font-size="14" font-weight="600" fill="#1a1a1a">Query Service</text>
-    <text x="620" y="422" font-size="11" fill="#1a1a1a" fill-opacity="0.65">檢索與答案生成</text>
+    <text x="620" y="422" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Retrieval + answers</text>
   </g>
   <g class="node" id="n-auth">
     <rect x="884" y="184" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-shield" x="900" y="204" width="24" height="24"/>
     <text x="940" y="212" font-size="14" font-weight="600" fill="#1a1a1a">Auth Provider</text>
-    <text x="940" y="230" font-size="11" fill="#1a1a1a" fill-opacity="0.65">OIDC 身分驗證</text>
+    <text x="940" y="230" font-size="11" fill="#1a1a1a" fill-opacity="0.65">OIDC identity</text>
   </g>
   <g class="node" id="n-llm">
     <rect x="884" y="272" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-sparkle" x="900" y="292" width="24" height="24"/>
     <text x="940" y="300" font-size="14" font-weight="600" fill="#1a1a1a">LLM API</text>
-    <text x="940" y="318" font-size="11" fill="#1a1a1a" fill-opacity="0.65">生成式模型 API</text>
+    <text x="940" y="318" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Generative model API</text>
   </g>
   <g class="node" id="n-ingest">
     <rect x="884" y="464" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-terminal" x="900" y="484" width="24" height="24"/>
     <text x="940" y="492" font-size="14" font-weight="600" fill="#1a1a1a">Ingest CLI</text>
-    <text x="940" y="510" font-size="11" fill="#1a1a1a" fill-opacity="0.65">批次匯入與切塊</text>
+    <text x="940" y="510" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Import + chunking</text>
   </g>
   <g class="node" id="n-embedder">
     <rect x="884" y="568" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-chip" x="900" y="588" width="24" height="24"/>
     <text x="940" y="596" font-size="14" font-weight="600" fill="#1a1a1a">Embedder</text>
-    <text x="940" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">計算文字向量</text>
+    <text x="940" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Text embeddings</text>
   </g>
   <g class="node" id="n-postgres">
     <rect x="84" y="568" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-database" x="100" y="588" width="24" height="24"/>
     <text x="140" y="596" font-size="14" font-weight="600" fill="#1a1a1a">PostgreSQL</text>
-    <text x="140" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">使用者與文件中繼資料</text>
+    <text x="140" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Users + doc metadata</text>
   </g>
   <g class="node" id="n-storage">
     <rect x="324" y="568" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-bucket" x="340" y="588" width="24" height="24"/>
     <text x="380" y="596" font-size="14" font-weight="600" fill="#1a1a1a">Object Storage</text>
-    <text x="380" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">原始文件檔案</text>
+    <text x="380" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Raw document files</text>
   </g>
   <g class="node" id="n-vector">
     <rect x="564" y="568" width="192" height="64" rx="10" fill="#faf8f4" stroke="#1a1a1a" stroke-width="1.5"/>
     <use href="#icon-database" x="580" y="588" width="24" height="24"/>
     <text x="620" y="596" font-size="14" font-weight="600" fill="#1a1a1a">Vector DB</text>
-    <text x="620" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">向量索引</text>
+    <text x="620" y="614" font-size="11" fill="#1a1a1a" fill-opacity="0.65">Vector index</text>
+  </g>
+
+  <!-- 資料流標籤（只標 payload 不明顯的線） -->
+  <g class="label" id="l-prompt" data-edge="e-query-llm">
+    <rect x="741" y="346" width="49" height="14" fill="#faf8f4"/>
+    <text x="745" y="356" font-size="10" letter-spacing="1" fill="#1a1a1a">PROMPT</text>
+  </g>
+  <g class="label" id="l-embeddings" data-edge="e-embedder-vector">
+    <rect x="784" y="580" width="77" height="14" fill="#faf8f4"/>
+    <text x="788" y="590" font-size="10" letter-spacing="1" fill="#1a1a1a">EMBEDDINGS</text>
+  </g>
+  <g class="label" id="l-raw-pdf" data-edge="e-ingest-storage">
+    <rect x="524" y="546" width="56" height="14" fill="#faf8f4"/>
+    <text x="528" y="556" font-size="10" letter-spacing="1" fill="#1a1a1a">RAW PDF</text>
+  </g>
+  <g class="label" id="l-id-token" data-edge="e-api-auth">
+    <rect x="616" y="298" width="63" height="14" fill="#faf8f4"/>
+    <text x="620" y="308" font-size="10" letter-spacing="1" fill="#1a1a1a">ID TOKEN</text>
   </g>
 </svg>

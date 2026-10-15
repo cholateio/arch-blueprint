@@ -46,12 +46,16 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 - **分區框只包住自己的節點**：框的大小 = 節點外緣 + 24px 內距 + 標題列。
   不要為了對齊把框拉到整排寬、讓節點擠在一角留一大塊空白；全寬分區的節點
   要置中或平均分佈。
-- **每個節點最多兩行**：粗體名稱（≤ 9 個中文字或 ≤ 15 個英文字元）+
-  一行職責（≤ 10 個中文字或 ≤ 20 個英文字元；中英混排時中文算 1、英文算 0.6，
-  以 `check.py` 的像素估算為準）。
-  Stage/演算法/參數等細節一律降級為職責小字或省略。
+- **圖內文字一律英文**，不管對話用什麼語言、專案 README 是什麼語言。
+  專有名詞照原文（PostgreSQL、Shioaji），其餘翻成簡短英文。
+- **每個節點最多兩行**：粗體名稱（≤ 15 字元）+ 一行職責（≤ 20 字元，
+  以 `check.py` 的像素估算為準）。Stage/演算法/參數等細節一律降級為職責
+  小字或省略。
 - **箭頭只畫主要資料流**，方向單純（整體由上而下或由左而右）。
-  箭頭不加文字標籤；語意不明時改寫節點的職責小字。
+- **資料流標籤只標不明顯的**：兩端節點名已能看出流什麼的線不標
+  （Browser → API Server）；payload 不明顯的才標（Query Service → LLM API:
+  `PROMPT`）。標籤寫「流的是什麼」的名詞，不寫動詞，≤ 14 字元、全大寫，
+  一張圖 ≤ 6 個。
 - 資料庫、快取、物件儲存放在「資料層」分區，線上與離線路徑分別指向它。
 
 ## 風格規格（怎麼畫）
@@ -65,12 +69,18 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 - 結構位置與尺寸（節點、容器的 x/y/寬/高、間距）一律落在 **4px 格線**上。
 
 **文字**
-- 字體：根元素設 `font-family="'JetBrains Mono','Noto Sans TC',monospace"`。
-- 分區標題：16px、`letter-spacing="3"`、英文全大寫（如 `OFFLINE PIPELINE`），
-  中文加註於下一行 12px；標題下畫一條 48px 短底線。位置：標題基線在分區
-  頂 +28、中文 +46、底線 +52，第一排節點從分區頂 +64 開始。
+- 字體：根元素設 `font-family="'JetBrains Mono',monospace"`。
+- 分區標題：16px、`letter-spacing="3"`、全大寫（如 `OFFLINE PIPELINE`），
+  標題下畫一條 48px 短底線。位置：標題基線在分區頂 +28、底線 +36，
+  第一排節點從分區頂 +64 開始。
 - 節點名稱：14px、weight 600；職責小字：11px、`fill-opacity="0.65"`。
   文字起點 x = 節點左 +56；名稱基線 y = 節點頂 +28、職責 +46。
+- 資料流標籤：10px、`letter-spacing="1"`、全大寫，墊一塊米白遮罩
+  （高 14、左右各留 4px、`fill="#faf8f4"`），整組包在
+  `<g class="label" data-edge="<該連線的 id>">` 裡。遮罩放在線段**旁邊**，
+  與線保持 4–12px（建議 6px），絕不壓在線上；水平線放上方或下方，垂直線
+  放左或右。遮罩不可壓到節點、其他線、其他標籤或分區標題；壓到分區虛線框
+  沒關係。
 - 主標題（可選）：頂部置中 28px、`letter-spacing="6"`、基線 y=84。
 
 **節點與容器**（畫法與群組方式照範例）
@@ -83,7 +93,7 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 - 分區寬度不是固定的：範例是左欄 720 + 走廊 40 + 右欄 320，走廊最多容納
   2 條平行線；線多就調整欄寬（例如 680 / 40 / 360）或把節點換到同一列，
   數字落在 4px 格線上即可。
-- 畫的順序：背景 → 分區 → 連線 → 節點。
+- 畫的順序：背景 → 分區 → 連線 → 節點 → 資料流標籤。
 
 **連線**（每條加 `class="edge"`）
 - 實線 `stroke-width="1.5"`、開放式箭頭（V 形，不用實心三角）：
@@ -127,7 +137,8 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 - [ ] `python3 scripts/check.py <檔案>` 零錯誤；警告逐條看過並處理
 - [ ] 節點 ≤ 12、連線 ≤ 12、只有米白與墨黑兩色
 - [ ] 任何連線都不穿過節點或文字；轉彎皆為直角；交叉處有跳線
-- [ ] 文字不溢出所屬矩形（中文字寬 ≈ 字級 × 1.0，英文 ≈ × 0.6）
+- [ ] 圖內全英文；文字不溢出所屬矩形（字寬 ≈ 字級 × 0.6）
+- [ ] 標籤 ≤ 6 個、只標不明顯的 payload、都貼著自己的線且沒壓到任何東西
 - [ ] 分區容器互不重疊，內距 ≥ 24px；圖形之間最小間距 ≥ 20px
 - [ ] icon 全部來自 icon 庫；用瀏覽器實際打開 SVG 看過一次
 - [ ] 檔案輸出至 `docs/architecture/`，並告知使用者預覽方式

@@ -6,8 +6,11 @@
 把 SKILL.md 裡能量化的規則全部跑一遍：
 
   結構   viewBox 1200 寬、role="img"、<title>/<desc> 齊全、字型含 JetBrains Mono
+  語言   圖內文字全英文（不得出現 CJK 字元）
   顏色   只有米白 #faf8f4 與墨黑 #1a1a1a；禁止漸層、濾鏡、陰影、外部圖片
-  數量   節點 ≤ 12、連線 ≤ 12
+  數量   節點 ≤ 12、連線 ≤ 12、資料流標籤 ≤ 6
+  標籤   g.label 的 data-edge 指向既有連線、遮罩貼著該線 4–12px、
+         不壓到節點／其他線／其他標籤／分區標題、文字 ≤ 14 字元且全大寫
   留白   所有圖形與文字距離畫布邊緣 ≥ 60px
   容器   分區互不重疊、節點與分區邊界內距 ≥ 24px、節點都在某個分區內
   節點   節點互不重疊且間距 ≥ 20px、尺寸落在 4px 格線、文字不溢出
@@ -39,6 +42,9 @@ ZONE_PAD = 24
 NODE_GAP = 20
 MAX_NODES = 12
 MAX_EDGES = 12
+MAX_LABELS = 6
+LABEL_MAX_CHARS = 14
+LABEL_GAP_MIN, LABEL_GAP_MAX = 4.0, 12.0
 FAN_GAP = 12
 NEAR_GAP = 16
 END_GAP_MIN, END_GAP_MAX = 2.0, 12.0
@@ -348,6 +354,12 @@ def check_svg(path: Path) -> Report:
     if not any("JetBrains Mono" in f for f in families):
         rep.W("FONT", "沒有任何元素宣告 'JetBrains Mono' 字型")
 
+    # --- 語言：圖內文字一律英文 ------------------------------------------------
+    for t in root.iter(f"{{{SVG_NS}}}text"):
+        content = "".join(t.itertext()).strip()
+        if any(is_cjk(c) for c in content):
+            rep.E("LANG", f"文字「{content}」含中日韓字元；圖內文字一律英文")
+
     # --- 顏色與禁用元素 ----------------------------------------------------
     for el in root.iter():
         t = tag(el)
@@ -370,6 +382,7 @@ def check_svg(path: Path) -> Report:
     zones: list[tuple[str, Rect, ET.Element]] = []
     zone_titles: list[tuple[str, Rect]] = []
     edges: list[tuple[str, ET.Element]] = []
+    labels: list[tuple[str, Rect, str, str]] = []  # (id, mask, text, data-edge)
     free_texts: list[Rect] = []
 
     def classes(el: ET.Element) -> set[str]:
@@ -393,13 +406,33 @@ def check_svg(path: Path) -> Report:
             zones.append((name, rect_of(r), g))
             for t in g.iter(f"{{{SVG_NS}}}text"):
                 zone_titles.append((name, text_bbox(t)))
+        elif "label" in cls:
+            r = g.find(f"{{{SVG_NS}}}rect")
+            t = g.find(f"{{{SVG_NS}}}text")
+            name = label(g, f"label#{idx}")
+            if r is None or t is None:
+                rep.E("LABEL", f"{name}：g.label 必須包含一個遮罩 <rect> 與一個 <text>")
+                continue
+            content = "".join(t.itertext()).strip()
+            mask = rect_of(r)
+            if not mask.contains(text_bbox(t, 10.0)):
+                rep.E("LABEL", f"{name}：文字「{content}」超出遮罩 {mask}")
+            if (paint(r, "fill") or "").strip().lower() != PAPER:
+                rep.E("LABEL", f"{name}：遮罩必須是不透明米白 fill=\"{PAPER}\"")
+            if len(content) > LABEL_MAX_CHARS:
+                rep.E("LABEL", f"{name}：「{content}」{len(content)} 字元，標籤 ≤ {LABEL_MAX_CHARS}")
+            if content != content.upper():
+                rep.W("LABEL", f"{name}：「{content}」應全大寫")
+            labels.append((name, mask, content, g.get("data-edge") or ""))
 
     for el in root.iter():
         if tag(el) in ("path", "line") and "edge" in classes(el):
             edges.append((label(el, f"edge#{len(edges) + 1}"), el))
 
-    # 不屬於任何 node/zone 的文字（主標題等）
+    # 不屬於任何 node/zone/label 的文字（主標題等）
     in_group = {id(t) for _, _, g in nodes + zones for t in g.iter(f"{{{SVG_NS}}}text")}
+    in_group |= {id(t) for g in root.iter(f"{{{SVG_NS}}}g") if "label" in classes(g)
+                 for t in g.iter(f"{{{SVG_NS}}}text")}
     for t in root.iter(f"{{{SVG_NS}}}text"):
         if id(t) not in in_group:
             free_texts.append(text_bbox(t))
@@ -414,6 +447,8 @@ def check_svg(path: Path) -> Report:
         rep.E("COUNT", f"節點 {len(nodes)} 個，超過上限 {MAX_NODES}；回到提案步驟重新拆解")
     if len(edges) > MAX_EDGES:
         rep.E("COUNT", f"連線 {len(edges)} 條，超過上限 {MAX_EDGES}")
+    if len(labels) > MAX_LABELS:
+        rep.E("COUNT", f"資料流標籤 {len(labels)} 個，超過上限 {MAX_LABELS}；只標 payload 不明顯的線")
 
     # --- 留白 -------------------------------------------------------------
     canvas = Rect(MARGIN, MARGIN, W - 2 * MARGIN, H - 2 * MARGIN)
@@ -582,7 +617,50 @@ def check_svg(path: Path) -> Report:
                             hop = any(math.hypot(a.cx - x[0], a.cy - x[1]) <= 10 for a in pa.arcs + pb.arcs)
                             if not hop:
                                 rep.E("EDGE", f"{na} 與 {nb} 在 ({x[0]:g},{x[1]:g}) 交叉但沒有跳線；在次要的那條加半圓跳線或改路徑")
+
+    # --- 資料流標籤 ---------------------------------------------------------
+    for i, (lname, mask, content, edge_id) in enumerate(labels):
+        if edge_id not in parsed:
+            rep.E("LABEL", f"{lname}：data-edge=\"{edge_id}\" 不是任何連線的 id")
+        else:
+            gaps = [g for g in (seg_mask_gap(s, mask) for s in parsed[edge_id].segs) if g is not None]
+            gap = min(gaps) if gaps else None
+            if gap is None or gap > LABEL_GAP_MAX + 0.01:
+                rep.E("LABEL", f"{lname}：遮罩 {mask} 沒有貼著連線 {edge_id}（需與某線段相距 {LABEL_GAP_MIN:g}–{LABEL_GAP_MAX:g}px）")
+            elif gap < LABEL_GAP_MIN - 0.01:
+                rep.E("LABEL", f"{lname}：遮罩距連線 {edge_id} 只有 {gap:.0f}px，需 ≥ {LABEL_GAP_MIN:g}px")
+        for nname, r, _ in nodes:
+            if mask.overlaps(r):
+                rep.E("LABEL", f"{lname}：遮罩壓到節點 {nname}")
+        for zname, tb in zone_titles:
+            if mask.overlaps(tb):
+                rep.E("LABEL", f"{lname}：遮罩壓到分區 {zname} 的標題")
+        for oname, omask, _, _ in labels[i + 1:]:
+            if mask.overlaps(omask):
+                rep.E("LABEL", f"{lname} 與 {oname} 的遮罩重疊")
+        for ename, p in parsed.items():
+            if any(s.hits_rect(mask) for s in p.segs):
+                rep.E("LABEL", f"{lname}：連線 {ename} 穿過遮罩；標籤要放在線旁邊，不是線上")
     return rep
+
+
+def seg_mask_gap(s: Seg, m: Rect) -> float | None:
+    """水平／垂直線段與遮罩的垂直距離；線段沒有正對遮罩時回傳 None。"""
+    if s.axis == "h":
+        lo, hi = sorted((s.x1, s.x2))
+        if hi < m.x or lo > m.x2:
+            return None
+        if m.y <= s.y1 <= m.y2:
+            return 0.0
+        return min(abs(s.y1 - m.y), abs(s.y1 - m.y2))
+    if s.axis == "v":
+        lo, hi = sorted((s.y1, s.y2))
+        if hi < m.y or lo > m.y2:
+            return None
+        if m.x <= s.x1 <= m.x2:
+            return 0.0
+        return min(abs(s.x1 - m.x), abs(s.x1 - m.x2))
+    return None
 
 
 def attach_info(pt: tuple[float, float], nodes) -> tuple[str, str, float, float] | None:

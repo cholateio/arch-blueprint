@@ -128,6 +128,40 @@ class ExampleTests(unittest.TestCase):
         self.assert_error(rep, "ICON", "icon-rocket")
 
 
+class LabelTests(ExampleTests):
+    def test_cjk_text_rejected(self) -> None:
+        rep = self.mutate(">Vector index<", ">向量索引<")
+        self.assert_error(rep, "LANG")
+
+    def test_label_unknown_edge(self) -> None:
+        rep = self.mutate('data-edge="e-query-llm"', 'data-edge="e-nope"')
+        self.assert_error(rep, "LABEL", "e-nope")
+
+    def test_label_too_far_from_edge(self) -> None:
+        rep = self.mutate('<rect x="741" y="346" width="49"', '<rect x="700" y="346" width="49"')
+        self.assert_error(rep, "LABEL", "沒有貼著")
+
+    def test_label_on_the_line(self) -> None:
+        rep = self.mutate('<rect x="784" y="580" width="77"', '<rect x="784" y="594" width="77"')
+        self.assert_error(rep, "LABEL", "穿過遮罩")
+
+    def test_label_over_node(self) -> None:
+        rep = self.mutate('<rect x="524" y="546" width="56"', '<rect x="524" y="562" width="56"')
+        self.assert_error(rep, "LABEL", "壓到節點")
+
+    def test_label_too_long(self) -> None:
+        rep = self.mutate(">PROMPT<", ">PROMPT WITH CONTEXT<")
+        self.assert_error(rep, "LABEL", "字元")
+
+    def test_too_many_labels(self) -> None:
+        extra = "".join(
+            f'<g class="label" id="lx{i}" data-edge="e-browser-api"><rect x="426" y="{260 + i * 20}" width="40" height="14" fill="#faf8f4"/>'
+            f'<text x="430" y="{270 + i * 20}" font-size="10" letter-spacing="1">L{i}</text></g>' for i in range(3)
+        )
+        rep = self.mutate("</svg>", extra + "</svg>")
+        self.assert_error(rep, "COUNT", "標籤")
+
+
 class PathParserTests(unittest.TestCase):
     def test_relative_and_arc(self) -> None:
         p = check.parse_path("M10,10 h20 v10 a4,4 0 0,1 8,0 H60")
