@@ -81,6 +81,15 @@ class ExampleTests(unittest.TestCase):
         rep = self.mutate("H700 a8,8 0 0,0 -16,0 H420", "H420")
         self.assert_error(rep, "EDGE", "交叉但沒有跳線")
 
+    def test_edge_grazing_node_warns(self) -> None:
+        # Query→Postgres 的水平段貼著 Object Storage 上緣 8px 走
+        rep = self.mutate('d="M628,440 V520 H180 V562"', 'd="M628,440 V560 H180 V562"')
+        self.assertTrue(any("距離不足" in w for w in rep.warnings), rep.warnings)
+
+    def test_node_without_icon_is_fine(self) -> None:
+        rep = self.mutate('<use href="#icon-sparkle" x="900" y="292" width="24" height="24"/>', "")
+        self.assertFalse([w for w in rep.warnings if "ICON" in w], rep.warnings)
+
     def test_fan_points_too_close(self) -> None:
         rep = self.mutate('d="M628,440 V520 H180 V562"', 'd="M684,440 V520 H180 V562"')
         self.assert_error(rep, "EDGE", "接點只相距")

@@ -14,7 +14,8 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 ## 工作流程（依序執行，不可跳過確認步）
 
 1. **分析專案**：讀 README、進入點、資料夾結構與主要 import 關係，識別
-   實際的模組邊界（以職責與依賴為準，不是照資料夾照抄）。
+   實際的模組邊界（以職責與依賴為準，不是照資料夾照抄）。以文件或設定為主的
+   專案（skill、plugin、infra repo）改看 manifest、指令檔與文件之間的互相引用。
 2. **提案拆解**：用文字列出打算畫的「分區 × 節點 × 主要資料流」清單給使用者
    確認。列完先做一輪**刪減測試**，再送出：
    - 哪個節點拿掉後讀者仍看得懂？拿掉。
@@ -22,11 +23,14 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
    - 哪條箭頭從排版（上游在上、下游在下）就看得出來？拿掉。
    - 哪條線是次要關係（驗證、監控、設定）？降為虛線或省略。
    粒度不對就調整，**確認後才開始畫**。
-3. **產出 SVG**：依下方規則寫出 `docs/architecture/overview.svg`。
+3. **產出 SVG**：依下方規則寫出 `docs/architecture/overview.svg`
+   （使用者指定其他路徑時照指定）。
 4. **自檢**：先跑腳本，再逐項過自檢清單，全部修正後才交付：
    ```bash
    python3 <本 skill 目錄>/scripts/check.py docs/architecture/overview.svg
    ```
+   接著實際看圖：有桌面就用瀏覽器打開；沒有就用 headless Chrome/Chromium 截圖
+   再讀圖（`chrome --headless --screenshot=out.png --window-size=1200,H file.svg`）。
 5. **（僅在使用者要求時）** 為個別模組產出細部圖 `docs/architecture/<模組>.svg`，
    同樣規則遞迴適用：該模組內部再分區、節點上限相同。
 
@@ -36,8 +40,11 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
   拆解太細，回到步驟 2 重新提案，而不是縮小字體硬塞。
 - **分層容器**：用圓角虛線框把節點分組，預設分區為
   「前端 / 後端 / 資料層 / 雲端外部服務」，有離線批次流程（建庫、ETL、
-  排程任務）時獨立成區。分區標題置於框內左上角。
-- **每個節點最多兩行**：粗體名稱 + 一行職責（≤ 10 個中文字）。
+  排程任務）時獨立成區。專案性質不同就改分區名（CLI 工具、skill repo、
+  函式庫都不是 web app），原則是「依職責與信任邊界分，一區 2–4 個節點」。
+  分區標題置於框內左上角。
+- **每個節點最多兩行**：粗體名稱（≤ 9 個中文字或 ≤ 15 個英文字元）+
+  一行職責（≤ 10 個中文字或 ≤ 20 個英文字元；中英混排時中文算 1、英文算 0.6）。
   Stage/演算法/參數等細節一律降級為職責小字或省略。
 - **箭頭只畫主要資料流**，方向單純（整體由上而下或由左而右）。
   箭頭不加文字標籤；語意不明時改寫節點的職責小字。
@@ -56,9 +63,11 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 **文字**
 - 字體：根元素設 `font-family="'JetBrains Mono','Noto Sans TC',monospace"`。
 - 分區標題：16px、`letter-spacing="3"`、英文全大寫（如 `OFFLINE PIPELINE`），
-  中文加註於下一行 12px；標題下畫一條 48px 短底線。
+  中文加註於下一行 12px；標題下畫一條 48px 短底線。位置：標題基線在分區
+  頂 +28、中文 +46、底線 +52，第一排節點從分區頂 +64 開始。
 - 節點名稱：14px、weight 600；職責小字：11px、`fill-opacity="0.65"`。
-- 主標題（可選）：頂部置中 28px、`letter-spacing="6"`。
+  文字起點 x = 節點左 +56；名稱基線 y = 節點頂 +28、職責 +46。
+- 主標題（可選）：頂部置中 28px、`letter-spacing="6"`、基線 y=84。
 
 **節點與容器**（畫法與群組方式照範例）
 - 每個節點包在 `<g class="node">` 裡：矩形 `rx="10"`、`fill="#faf8f4"`
@@ -67,6 +76,9 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 - 每個分區包在 `<g class="zone">` 裡：`rx="16"`、`stroke-width="1.2"`
   `stroke-dasharray="5 5"`、無填色；標題與底線也放在同一個 g 內。
   容器內距 ≥ 24px，分區互不重疊，節點之間最小間距 ≥ 20px。
+- 分區寬度不是固定的：範例是左欄 720 + 走廊 40 + 右欄 320，走廊最多容納
+  2 條平行線；線多就調整欄寬（例如 680 / 40 / 360）或把節點換到同一列，
+  數字落在 4px 格線上即可。
 - 畫的順序：背景 → 分區 → 連線 → 節點。
 
 **連線**（每條加 `class="edge"`）
@@ -77,13 +89,19 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
     <path d="M2 1L8 5L2 9" fill="none" stroke="#1a1a1a" stroke-width="1.5"
       stroke-linecap="round" stroke-linejoin="round"/></marker>
   ```
-- 次要關係（身分驗證、觀測、設定）用虛線 `stroke-dasharray="4 4"`、無箭頭。
-- 只能水平或垂直，轉彎用直角 L 形（`M x,y V.. H.. V..`），**絕不可穿過任何
-  節點或文字**。起點貼在節點邊緣，箭頭尖端停在目標節點邊緣外 6px。
+- 次要關係（身分驗證、觀測、設定）用虛線 `stroke-dasharray="4 4"`、無箭頭，
+  兩端的停法與實線相同。
+- 只能水平或垂直，轉彎一律是**尖角**直角（`M x,y V.. H.. V..`，不用圓角），
+  **絕不可穿過任何節點或文字**。起點貼在節點邊緣，終點停在目標節點邊緣外 6px。
+- **分區標題是禁區**：每個分區左上角（約 220×64）留給標題，線不可經過；
+  第一欄節點往下一區走的線要從偏右的接點出發，或把節點排在第二欄。
+- **線與非端點節點保持 ≥ 16px**，不要貼邊擦過。
 - **出入口與邊垂直**：從上下邊出入的第一段必須是垂直線，從左右邊出入的必須是
-  水平線。目標在正上／下方時走上下邊，在左右時走左右邊，不要從側面斜戳進去。
-- **同一邊多條線要分開接點**：N 條線平均分佈在邊長 L 上（第 k 條在
-  `L·k/(N+1)`），相鄰接點 ≥ 12px，離角落 ≥ 8px。
+  水平線。目標在正上／下方時走上下邊，在左右時走左右邊；斜對角時看落差
+  哪個大，垂直落差大就走上下邊、水平落差大就走左右邊，不要從側面斜戳進去。
+- **接點**：一條線能走邊的中心就走中心，兩端對齊成一條直線；同一邊有多條線
+  時平均分佈，相鄰接點 ≥ 12px、離角落 ≥ 8px。兩端無法同時對齊時以直線優先，
+  只要間距達標即可。
 - **平行線錯開 ≥ 12px**，不可重疊共用線段。
 - **交叉只能出現在不可避免時**，而且要在次要的那條線畫半圓跳線：往右走
   `H cx-8 a8,8 0 0,1 16,0`、往左走 `H cx+8 a8,8 0 0,0 -16,0`（cx 為交點）。
@@ -94,7 +112,9 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
   再以 `<use href="#icon-…" x=".." y=".." width="24" height="24"/>` 放在節點
   左側（x+16, y+20）。可用：browser、terminal、server、database、cache、
   bucket、cloud、shield、chip、file、gear、search、sparkle。
-- 不要自行手繪或修改 icon；找不到對應的就不放 icon。
+- 不要自行手繪或修改 icon；找不到對應的就不放 icon（文字起點仍保持 x+56）。
+  常見借用：文件／markdown → file，CI／驗證 → shield，網站／SaaS → cloud，
+  排程／平台 → gear。
 
 ## 自檢清單（交付前逐項檢查）
 

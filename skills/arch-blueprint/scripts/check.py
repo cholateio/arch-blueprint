@@ -12,9 +12,9 @@
   容器   分區互不重疊、節點與分區邊界內距 ≥ 24px、節點都在某個分區內
   節點   節點互不重疊且間距 ≥ 20px、尺寸落在 4px 格線、文字不溢出
   icon   每個節點恰有一個 <use href="#icon-*">，symbol 內容與 assets/icons.svg 一致
-  連線   只能水平／垂直（轉角用 Q、跳線用小圓弧 A）、不穿過節點或分區標題、
-         端點停在節點邊緣外 2–12px 並與邊垂直、同一邊的接點相距 ≥ 12px、
-         不同連線不可重疊、交叉處必須有跳線
+  連線   只能水平／垂直（直角轉彎；跳線用小圓弧 A）、不穿過節點或分區標題、
+         與非端點節點保持 ≥ 16px（警告）、端點停在節點邊緣外 2–12px 並與邊垂直、
+         同一邊的接點相距 ≥ 12px、不同連線不可重疊、交叉處必須有跳線
 
 錯誤（E）會讓結束碼變 1；警告（W）只提示。
 """
@@ -40,6 +40,7 @@ NODE_GAP = 20
 MAX_NODES = 12
 MAX_EDGES = 12
 FAN_GAP = 12
+NEAR_GAP = 16
 END_GAP_MIN, END_GAP_MAX = 2.0, 12.0
 START_GAP_MAX = 12.0
 ICON_LIB = Path(__file__).resolve().parent.parent / "assets" / "icons.svg"
@@ -460,8 +461,8 @@ def check_svg(path: Path) -> Report:
             if tb.x < r.x + 4 or tb.x2 > r.x2 - 4 or tb.y < r.y or tb.y2 > r.y2:
                 rep.E("TEXT", f"{name} 的文字「{''.join(t.itertext()).strip()}」估計寬 {tb.w:.0f}px，溢出矩形 {r}")
         uses = [u for u in g.iter(f"{{{SVG_NS}}}use") if (href(u) or "").startswith("#icon-")]
-        if len(uses) != 1:
-            rep.W("ICON", f"{name} 應有恰好 1 個 <use href=\"#icon-…\">，現在 {len(uses)} 個")
+        if len(uses) > 1:
+            rep.W("ICON", f"{name} 最多 1 個 <use href=\"#icon-…\">，現在 {len(uses)} 個")
         for u in uses:
             ur = Rect(num(u.get("x")), num(u.get("y")), num(u.get("width"), 24), num(u.get("height"), 24))
             if not r.contains(ur):
@@ -530,11 +531,15 @@ def check_svg(path: Path) -> Report:
             if along < 8:
                 rep.W("EDGE", f"{name}：{which}距 {nname} 的角落只有 {along:.0f}px，會落在圓角上")
 
-        # 穿越
+        # 穿越與擦邊
+        endpoint_nodes = {a[0] for a in (attach_info(p.start, nodes), attach_info(p.end, nodes)) if a}
         for s in p.segs:
             for nname, r, _ in nodes:
                 if s.hits_rect(r):
                     rep.E("EDGE", f"{name}：線段 ({s.x1:g},{s.y1:g})→({s.x2:g},{s.y2:g}) 穿過節點 {nname}")
+                elif nname not in endpoint_nodes and s.hits_rect(
+                        Rect(r.x - NEAR_GAP, r.y - NEAR_GAP, r.w + 2 * NEAR_GAP, r.h + 2 * NEAR_GAP)):
+                    rep.W("EDGE", f"{name}：線段 ({s.x1:g},{s.y1:g})→({s.x2:g},{s.y2:g}) 與節點 {nname} 距離不足 {NEAR_GAP}px")
             for zname, tb in zone_titles:
                 if s.hits_rect(tb):
                     rep.E("EDGE", f"{name}：線段穿過分區 {zname} 的標題文字")
