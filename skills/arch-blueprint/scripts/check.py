@@ -406,6 +406,9 @@ def check_svg(path: Path) -> Report:
             zones.append((name, rect_of(r), g))
             for t in g.iter(f"{{{SVG_NS}}}text"):
                 zone_titles.append((name, text_bbox(t)))
+                content = "".join(t.itertext()).strip()
+                if content != content.upper():
+                    rep.W("ZONE", f"{name} 的標題「{content}」應全大寫")
         elif "label" in cls:
             r = g.find(f"{{{SVG_NS}}}rect")
             t = g.find(f"{{{SVG_NS}}}text")

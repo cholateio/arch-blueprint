@@ -54,8 +54,11 @@ description: Use when asked to draw an architecture diagram, system diagram, mod
 - **箭頭只畫主要資料流**，方向單純（整體由上而下或由左而右）。
 - **資料流標籤只標不明顯的**：兩端節點名已能看出流什麼的線不標
   （Browser → API Server）；payload 不明顯的才標（Query Service → LLM API:
-  `PROMPT`）。標籤寫「流的是什麼」的名詞，不寫動詞，≤ 14 字元、全大寫，
-  一張圖 ≤ 6 個。
+  `PROMPT`）。標籤寫「流的是什麼」的名詞，不寫動詞也不寫演算法名
+  （HNSW、RRF 是細節，降到職責小字），≤ 14 字元（含空格）、全大寫，
+  一張圖 ≤ 6 個。虛線的 payload 是重點時一樣可以標（`ID TOKEN`）。
+  相鄰節點之間放不下標籤時，先把 payload 寫進目標節點的職責小字；
+  真的需要標籤才拉開間距。
 - 資料庫、快取、物件儲存放在「資料層」分區，線上與離線路徑分別指向它。
 
 ## 風格規格（怎麼畫）
