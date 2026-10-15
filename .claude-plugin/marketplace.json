@@ -1,0 +1,16 @@
+{
+  "name": "arch-blueprint",
+  "owner": {
+    "name": "cholateio"
+  },
+  "metadata": {
+    "description": "Black-and-white blueprint-style architecture overview diagrams for software projects."
+  },
+  "plugins": [
+    {
+      "name": "arch-blueprint",
+      "source": "./",
+      "description": "Draw a black-and-white, blueprint-style architecture overview SVG of any software project."
+    }
+  ]
+}

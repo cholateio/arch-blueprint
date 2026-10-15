@@ -1,0 +1,12 @@
+{
+  "name": "arch-blueprint",
+  "description": "Draw a black-and-white, blueprint-style architecture overview SVG of any software project. 黑白線條風格的系統架構總覽圖。",
+  "version": "0.1.0",
+  "author": {
+    "name": "cholateio",
+    "url": "https://github.com/cholateio"
+  },
+  "repository": "https://github.com/cholateio/arch-blueprint",
+  "license": "MIT",
+  "keywords": ["architecture", "diagram", "svg", "blueprint", "overview", "架構圖"]
+}

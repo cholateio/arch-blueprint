@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  arch-blueprint icon 庫（24×24 線條 icon）。
+  用法：把需要的 <symbol> 原樣複製到架構圖的 <defs>，
+  再用 <use href="#icon-xxx" x=".." y=".." width="24" height="24"/> 放到節點左側。
+  scripts/check.py 會比對 symbol 內容是否與本檔一致。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="0" height="0" aria-hidden="true">
+  <defs>
+    <!-- browser 瀏覽器 / Web 前端 -->
+    <symbol id="icon-browser" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <line x1="2" y1="9" x2="22" y2="9"/>
+      <circle cx="5.5" cy="6.5" r="0.5"/>
+      <circle cx="8" cy="6.5" r="0.5"/>
+    </symbol>
+    <!-- terminal 終端機 / CLI / 腳本 -->
+    <symbol id="icon-terminal" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M6 10l3 2-3 2"/>
+      <line x1="11" y1="15" x2="16" y2="15"/>
+    </symbol>
+    <!-- server 服務 / API / 後端 -->
+    <symbol id="icon-server" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="7" rx="2"/>
+      <rect x="3" y="13" width="18" height="7" rx="2"/>
+      <circle cx="7" cy="7.5" r="0.6"/>
+      <circle cx="7" cy="16.5" r="0.6"/>
+    </symbol>
+    <!-- database 資料庫 -->
+    <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="6" rx="8" ry="3"/>
+      <path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/>
+      <path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>
+    </symbol>
+    <!-- cache 快取 / 即時 -->
+    <symbol id="icon-cache" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 3L6 13h5l-1 8 7-10h-5l1-8z"/>
+    </symbol>
+    <!-- bucket 物件儲存 / 檔案倉 -->
+    <symbol id="icon-bucket" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 6h16l-2 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L4 6z"/>
+      <ellipse cx="12" cy="6" rx="8" ry="2.2"/>
+    </symbol>
+    <!-- cloud 雲端服務 -->
+    <symbol id="icon-cloud" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 18a4.5 4.5 0 1 1 .8-8.9A6 6 0 0 1 19.5 11 3.75 3.75 0 0 1 18 18H7z"/>
+    </symbol>
+    <!-- shield 安全 / 身分驗證 -->
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </symbol>
+    <!-- chip 模型 / GPU / 運算 -->
+    <symbol id="icon-chip" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="6" width="12" height="12" rx="2"/>
+      <rect x="9.5" y="9.5" width="5" height="5"/>
+      <path d="M9 6V3M15 6V3M9 21v-3M15 21v-3M6 9H3M6 15H3M21 9h-3M21 15h-3"/>
+    </symbol>
+    <!-- file 文件 / PDF / 設定檔 -->
+    <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2h8l4 4v16H6V2z"/>
+      <path d="M14 2v4h4"/>
+      <line x1="9" y1="12" x2="15" y2="12"/>
+      <line x1="9" y1="16" x2="15" y2="16"/>
+    </symbol>
+    <!-- gear 設定 / 平台 / 排程 -->
+    <symbol id="icon-gear" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3.2"/>
+      <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>
+    </symbol>
+    <!-- search 檢索 / 查詢 -->
+    <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="10.5" cy="10.5" r="6.5"/>
+      <line x1="15.5" y1="15.5" x2="21" y2="21"/>
+    </symbol>
+    <!-- sparkle LLM / 生成 -->
+    <symbol id="icon-sparkle" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/>
+      <path d="M19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9L19 16z"/>
+    </symbol>
+  </defs>
+</svg>
