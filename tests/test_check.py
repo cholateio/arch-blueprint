@@ -123,6 +123,20 @@ class ExampleTests(unittest.TestCase):
         rep = self.mutate('<circle cx="5.5" cy="6.5" r="0.5"/>', '<circle cx="5.5" cy="6.5" r="1.5"/>')
         self.assert_error(rep, "ICON", "與 icon 庫不同")
 
+    def test_doctype_and_entity_rejected(self) -> None:
+        for decl in ('<!DOCTYPE svg [<!ENTITY a "aaaa">]>', '<!doctype svg>'):
+            rep = run(decl + self.svg)
+            self.assert_error(rep, "XML", "DOCTYPE")
+
+    def test_non_utf8_rejected(self) -> None:
+        with tempfile.NamedTemporaryFile("wb", suffix=".svg", delete=False) as f:
+            f.write(self.svg.encode("utf-16"))
+            path = Path(f.name)
+        try:
+            self.assert_error(check.check_svg(path), "XML", "UTF-8")
+        finally:
+            path.unlink()
+
     def test_unknown_icon(self) -> None:
         rep = self.mutate('href="#icon-sparkle"', 'href="#icon-rocket"')
         self.assert_error(rep, "ICON", "icon-rocket")

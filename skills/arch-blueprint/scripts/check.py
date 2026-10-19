@@ -317,8 +317,18 @@ def label(el: ET.Element, fallback: str) -> str:
 
 def check_svg(path: Path) -> Report:
     rep = Report(str(path))
+    # Input may be written by an agent that read untrusted repos: no DTDs, so no entity
+    # expansion, and strict UTF-8 so the DOCTYPE scan cannot be dodged with UTF-16.
     try:
-        root = ET.parse(path).getroot()
+        text = path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as exc:
+        rep.E("XML", f"不是 UTF-8：{exc}")
+        return rep
+    if re.search(r"<!DOCTYPE|<!ENTITY", text, re.I):
+        rep.E("XML", "不允許 DOCTYPE／ENTITY 宣告")
+        return rep
+    try:
+        root = ET.fromstring(text)
     except ET.ParseError as exc:
         rep.E("XML", f"無法解析：{exc}")
         return rep
