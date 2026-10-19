@@ -1,77 +1,57 @@
-<div align="center">
-
 # arch-blueprint
 
-**An agent skill that turns any software repo into a one-page, black-and-white blueprint-style architecture diagram (SVG).**
+You open a repo, yours or someone else's, and want one picture of how its parts connect. Ask your coding agent to draw its architecture, and you get a single black-and-white, blueprint-style SVG at `docs/architecture/overview.svg` that a script has checked before it reaches you.
 
-把任何程式專案畫成一張「黑白線條藍圖風格」的系統架構總覽圖。
+![Example overview of a document-search app drawn in thin black lines on cream: a browser SPA calls an API server and a query service, which reads PostgreSQL and a vector database and calls an LLM API, while an offline ingest pipeline fills object storage and the vector index](skills/arch-blueprint/assets/example-overview.svg)
 
-<img src="skills/arch-blueprint/assets/example-overview.svg" alt="Example: DocSearch system overview drawn by arch-blueprint" width="900">
+- **Proposal first**: the agent reads the README, entry points, folder layout and imports, then lists zones, nodes and data flows as text and waits for your confirmation before drawing.
+- **One page**: at most 12 nodes, 12 connectors and 6 flow labels. A project that does not fit goes back to the proposal for a coarser breakdown, never to a smaller font.
+- **Fixed style**: cream paper `#faf8f4` and ink `#1a1a1a` only, dashed rounded boxes for layers, 24 px line icons from a bundled set of 13, open V-shaped arrowheads, JetBrains Mono, and English text whatever language you prompt in.
+- **Script-checked**: `check.py` measures colours, language, counts, 60 px margins, the 4 px grid, text overflow, icons copied verbatim, and connector rules such as right angles only, no lines through nodes or labels, and a hop at every unavoidable crossing. It exits with 1 on any error.
 
-</div>
+The checker on a draft with a stray colour and a Chinese label:
 
-## What it does
+```
+$ python3 skills/arch-blueprint/scripts/check.py overview.svg
+```
 
-Ask your agent in plain words — *"畫一張這個專案的架構圖"* or *"draw an architecture overview of this repo"* — and the skill will:
+```
+✗ overview.svg  (11 錯誤, 0 警告)
+    E-LANG: 文字「瀏覽器」含中日韓字元；圖內文字一律英文
+    E-COLOR: <path > stroke="#d33" 不是米白 #faf8f4 或墨黑 #1a1a1a
+    E-COLOR: <symbol icon-browser> stroke="#d33" 不是米白 #faf8f4 或墨黑 #1a1a1a
+    …
+```
 
-1. Read the project (README, entry points, folder layout, imports) and find the real module boundaries.
-2. Propose the zones × nodes × data flows as text and **wait for your confirmation**.
-3. Write a single self-contained `docs/architecture/overview.svg`.
-4. Run `scripts/check.py` and fix every reported violation before handing it over.
+The skill's instructions and the checker's messages are written in Traditional Chinese; the diagrams are always in English.
 
-**Style is deliberately fixed:** cream paper `#faf8f4`, ink `#1a1a1a`, nothing else. No gradients, no shadows, no color-coding. Dashed rounded containers for layers, 24 px line icons, open V-shaped arrowheads, JetBrains Mono. All text inside the diagram is English, whatever language you prompt in. Flow labels (`PROMPT`, `EMBEDDINGS`) go only on edges whose payload isn't obvious from the two node names — at most six per diagram.
+## How it works
 
-**Scope is deliberately narrow:** one overview per project, ≤ 12 nodes, ≤ 12 edges. If it doesn't fit, the decomposition is too fine — not the font.
+```
+"draw the architecture" ──► agent reads README, entry points, imports
+                                    │
+              proposal: zones × nodes × flows ──► you confirm or adjust
+                                    │
+          docs/architecture/overview.svg ──► check.py ──► fixes until 0 errors
+```
+
+The skill is a text file of instructions plus one Python script. Nothing is installed and nothing connects to the network.
 
 ## Install
 
-Any host that reads [Agent Skills](https://agentskills.io) (Claude Code, Codex, Cursor, Gemini CLI, …):
+You need a coding agent that reads [Agent Skills](https://agentskills.io), such as Claude Code, Codex, Cursor or Gemini CLI, and Python 3 for the checker.
 
-```bash
-npx skills add cholateio/arch-blueprint
-```
+1. Add the skill with `npx skills add cholateio/arch-blueprint`. In Claude Code you can instead run `/plugin marketplace add cholateio/arch-blueprint`, then `/plugin install arch-blueprint@arch-blueprint`. Or copy `skills/arch-blueprint/` into your host's skills folder (`~/.claude/skills/` for Claude Code).
+2. Read `skills/arch-blueprint/SKILL.md` once. It is everything your agent will be told to do.
+3. In any project, ask "draw an architecture overview of this repo" and answer the proposal.
 
-Claude Code plugin marketplace:
+## Privacy & security
 
-```text
-/plugin marketplace add cholateio/arch-blueprint
-/plugin install arch-blueprint@arch-blueprint
-```
-
-Manual: copy `skills/arch-blueprint/` into `~/.claude/skills/` (or your host's skills directory).
-
-## Checking a diagram
-
-The checker needs only the Python standard library:
-
-```bash
-python3 skills/arch-blueprint/scripts/check.py docs/architecture/overview.svg
-```
-
-It verifies what the style guide says in numbers: two colors only, English-only text, node/edge/label counts, 60 px margins, container padding, node spacing, 4 px grid, text overflow estimates, icons copied verbatim from the library, flow labels sitting beside their own edge and over nothing else, and the connector rules — orthogonal only, no transit through nodes or labels, arrowheads stopping 6 px short, fan-out attach points ≥ 12 px apart, no overlapping strokes, a hop at every unavoidable crossing. Exit code 1 on any error.
-
-## Repository layout
-
-```
-skills/arch-blueprint/
-├── SKILL.md                  # the skill: workflow, content rules, style spec, checklist
-├── assets/icons.svg          # 13 line icons as <symbol>s — copy verbatim
-├── assets/example-overview.svg
-└── scripts/check.py          # stdlib-only verifier
-tests/test_check.py           # python3 -m unittest discover -s tests
-```
-
-## 中文說明
-
-- **用途**：只畫軟體專案的 overview 架構圖，不是通用繪圖工具。
-- **流程**：分析專案 → 提案「分區 × 節點 × 資料流」並等你確認 → 產出 SVG → 跑 `check.py` 自檢。
-- **風格固定**：米白底、墨黑線、分層虛線容器、線條 icon；不做換色、不做其他圖型。圖內文字一律英文。
-- **提示**：第三方 skill 本質是一份純文字指令，安裝前請先讀過 `SKILL.md`；本專案的腳本不連網、不安裝任何套件。
-
-## Credits
-
-Structure and the idea of a script-verified taste gate were inspired by [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design). The visual style here is its own and intentionally not skinnable.
+- A skill is plain-text instructions that your agent follows with your permissions. Read `SKILL.md` before installing it.
+- `check.py` uses only the Python standard library. It reads the SVG files you pass it and nothing else.
+- The skill sends nothing anywhere itself; your agent reads the repo inside your own session.
+- The diagram is one self-contained SVG. The checker rejects external images, gradients, filters and shadows.
 
 ## License
 
-MIT
+[MIT](LICENSE). The structure and the idea of a script-verified taste gate were inspired by [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design); the visual style is its own.
