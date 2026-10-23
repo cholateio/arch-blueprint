@@ -1,17 +1,17 @@
 # arch-blueprint
 
-**English** | [繁體中文](README.zh-TW.md)
+**繁體中文** | [English](README.en.md)
 
-You open a repo, yours or someone else's, and want one picture of how its parts connect. Ask your coding agent to draw its architecture, and you get a single black-and-white, blueprint-style SVG at `docs/architecture/overview.svg` that a script has checked before it reaches you.
+你打開一個 repo，不管是自己的還是別人的，想用一張圖看懂各部分怎麼連在一起。請你的 coding agent 畫出它的架構，就會在 `docs/architecture/overview.svg` 得到一張黑白、藍圖風格的 SVG，而且交到你手上之前已經由腳本檢查過。
 
-![Example overview of a document-search app drawn in thin black lines on cream: a browser SPA calls an API server and a query service, which reads PostgreSQL and a vector database and calls an LLM API, while an offline ingest pipeline fills object storage and the vector index](skills/arch-blueprint/assets/example-overview.svg)
+![文件搜尋 App 的架構總覽範例，以細黑線畫在米白底上：瀏覽器 SPA 呼叫 API 伺服器和查詢服務，查詢服務讀取 PostgreSQL 與向量資料庫並呼叫 LLM API，另有一條離線匯入管線把資料填進物件儲存與向量索引](skills/arch-blueprint/assets/example-overview.svg)
 
-- **Proposal first**: the agent reads the README, entry points, folder layout and imports, then lists zones, nodes and data flows as text and waits for your confirmation before drawing.
-- **One page**: at most 12 nodes, 12 connectors and 6 flow labels. A project that does not fit goes back to the proposal for a coarser breakdown, never to a smaller font.
-- **Fixed style**: cream paper `#faf8f4` and ink `#1a1a1a` only, dashed rounded boxes for layers, 24 px line icons from a bundled set of 13, open V-shaped arrowheads, JetBrains Mono, and English text whatever language you prompt in.
-- **Script-checked**: `check.py` measures colours, language, counts, 60 px margins, the 4 px grid, text overflow, icons copied verbatim, and connector rules such as right angles only, no lines through nodes or labels, and a hop at every unavoidable crossing. It exits with 1 on any error.
+- **先提案**：agent 會讀 README、進入點、資料夾結構和 import，接著用文字列出分區、節點和資料流，等你確認後才開始畫。
+- **一頁就好**：最多 12 個節點、12 條連線、6 個資料流標籤。放不下的專案會退回提案階段，改成更粗的拆法，絕不是把字縮小。
+- **固定風格**：只用米白紙色 `#faf8f4` 和墨黑 `#1a1a1a`，以虛線圓角框表示分層，24 px 線條圖示取自內附的 13 個，開口 V 形箭頭，JetBrains Mono 字型，而且不管你用什麼語言下指令，圖內文字一律是英文。
+- **腳本把關**：`check.py` 會量測顏色、語言、數量、60 px 邊界、4 px 格線、文字溢出、圖示是否原樣複製，以及連線規則，例如只能直角轉折、線不能穿過節點或標籤、無法避免的交叉處都要畫跳線。只要有任何錯誤，就以 1 結束。
 
-The checker on a draft with a stray colour and a Chinese label:
+用 checker 檢查一張混進多餘顏色和中文標籤的草稿：
 
 ```
 $ python3 skills/arch-blueprint/scripts/check.py overview.svg
@@ -25,35 +25,35 @@ $ python3 skills/arch-blueprint/scripts/check.py overview.svg
     …
 ```
 
-The skill's instructions and the checker's messages are written in Traditional Chinese; the diagrams are always in English.
+skill 的指示和 checker 的訊息都以繁體中文撰寫；圖一律是英文。
 
-## How it works
+## 它怎麼運作
 
 ```
-"draw the architecture" ──► agent reads README, entry points, imports
-                                    │
-              proposal: zones × nodes × flows ──► you confirm or adjust
-                                    │
-          docs/architecture/overview.svg ──► check.py ──► fixes until 0 errors
+「畫出架構圖」 ──► agent 讀 README、進入點、import
+                              │
+              提案：分區 × 節點 × 資料流 ──► 你確認或調整
+                              │
+          docs/architecture/overview.svg ──► check.py ──► 修到 0 個錯誤
 ```
 
-The skill is a text file of instructions plus one Python script. Nothing is installed and nothing connects to the network.
+這個 skill 就是一份文字指示檔加上一支 Python 腳本。不用安裝任何東西，也不會連上網路。
 
-## Install
+## 安裝
 
-You need a coding agent that reads [Agent Skills](https://agentskills.io), such as Claude Code, Codex, Cursor or Gemini CLI, and Python 3 for the checker.
+你需要一個能讀取 [Agent Skills](https://agentskills.io) 的 coding agent，例如 Claude Code、Codex、Cursor 或 Gemini CLI，以及執行 checker 用的 Python 3。
 
-1. Add the skill with `npx skills add cholateio/arch-blueprint`. In Claude Code you can instead run `/plugin marketplace add cholateio/arch-blueprint`, then `/plugin install arch-blueprint@arch-blueprint`. Or copy `skills/arch-blueprint/` into your host's skills folder (`~/.claude/skills/` for Claude Code).
-2. Read `skills/arch-blueprint/SKILL.md` once. It is everything your agent will be told to do.
-3. In any project, ask "draw an architecture overview of this repo" and answer the proposal.
+1. 用 `npx skills add cholateio/arch-blueprint` 加入 skill。在 Claude Code 裡也可以改成執行 `/plugin marketplace add cholateio/arch-blueprint`，再執行 `/plugin install arch-blueprint@arch-blueprint`。或者把 `skills/arch-blueprint/` 複製到你所用工具的 skills 資料夾（Claude Code 是 `~/.claude/skills/`）。
+2. 把 `skills/arch-blueprint/SKILL.md` 讀過一遍。你的 agent 會被要求做的事全都寫在裡面。
+3. 在任何專案裡說「幫這個 repo 畫一張架構總覽圖」，然後回覆它的提案。
 
-## Privacy & security
+## 隱私與安全
 
-- A skill is plain-text instructions that your agent follows with your permissions. Read `SKILL.md` before installing it.
-- `check.py` uses only the Python standard library. It reads the SVG files you pass it and nothing else.
-- The skill sends nothing anywhere itself; your agent reads the repo inside your own session.
-- The diagram is one self-contained SVG. The checker rejects external images, gradients, filters and shadows.
+- skill 是純文字指示，你的 agent 會以你的權限照著做。安裝前先讀過 `SKILL.md`。
+- `check.py` 只用 Python 標準函式庫。它只讀你傳給它的 SVG 檔，其他什麼都不讀。
+- skill 本身不會把任何東西送出去；是你的 agent 在你自己的 session 裡讀 repo。
+- 圖是一個自成一體的 SVG。checker 會拒絕外部圖片、漸層、濾鏡和陰影。
 
-## License
+## 授權
 
-[MIT](LICENSE). The structure and the idea of a script-verified taste gate were inspired by [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design); the visual style is its own.
+[MIT](LICENSE)。整體結構和「用腳本驗證品味關卡」的想法受到 [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) 啟發；視覺風格是自己的。

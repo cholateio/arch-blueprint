@@ -28,7 +28,7 @@ A Claude Code plugin (skill) that draws a single black-and-white, blueprint-styl
 ## Conventions
 
 - Conventional commits; run the test command above before committing.
-- `README.md` and `README.zh-TW.md` mirror each other; update both in the same commit.
+- `README.md` (Traditional Chinese, default) and `README.en.md` (English) mirror each other; update both in the same commit.
 - GitHub Actions: top-level `permissions: contents: read`, raised per job only when needed.
 - GitHub Actions: pin every `uses:` to a 40-character commit SHA with a trailing `# vX.Y.Z` comment.
 
