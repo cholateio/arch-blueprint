@@ -1,5 +1,7 @@
 # arch-blueprint
 
+**English** | [繁體中文](README.zh-TW.md)
+
 You open a repo, yours or someone else's, and want one picture of how its parts connect. Ask your coding agent to draw its architecture, and you get a single black-and-white, blueprint-style SVG at `docs/architecture/overview.svg` that a script has checked before it reaches you.
 
 ![Example overview of a document-search app drawn in thin black lines on cream: a browser SPA calls an API server and a query service, which reads PostgreSQL and a vector database and calls an LLM API, while an offline ingest pipeline fills object storage and the vector index](skills/arch-blueprint/assets/example-overview.svg)
